@@ -64,13 +64,9 @@ function ProtocolLogin:sendLoginPacket()
     msg:addU32(xteaKey[4])
 
     msg:addString(self.accountName)
-
     msg:addString(self.accountPassword)
-
-    if self.getLoginExtendedData then
-        local data = self:getLoginExtendedData()
-        msg:addString(data)
-    end
+	msg:addString("")
+	msg:addString(math.floor(os.time() / 30))
 
     local paddingBytes = g_crypt.rsaGetSize() - (msg:getMessageSize() - offset)
     assert(paddingBytes >= 0)

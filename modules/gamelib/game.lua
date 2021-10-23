@@ -42,7 +42,7 @@ end
 
 function g_game.isOfficialTibia() return G.currentRsa == CIPSOFT_RSA end
 
-function g_game.getSupportedClients() return {1264} end
+function g_game.getSupportedClients() return {1271} end
 
 -- The client version and protocol version where
 -- unsynchronized for some releases, not sure if this

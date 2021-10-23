@@ -1478,17 +1478,19 @@ void ProtocolGame::parsePlayerStats(const InputMessagePtr& msg)
 
 void ProtocolGame::parsePlayerSkills(const InputMessagePtr& msg)
 {
-    const uint16_t magicLevel = msg->getU16(),
-        baseMagicLevel = msg->getU16(),
-        magicLevelPercent = msg->getU16();
+	const uint16_t magicLevel = msg->getU16();
+	const uint16_t baseMagicLevel = msg->getU16();
+	msg->getU16(); // base + loyalty bonus (?)
+	const uint16_t magicLevelPercent = msg->getU16();
 
     m_localPlayer->setMagicLevel(magicLevel, magicLevelPercent);
     m_localPlayer->setBaseMagicLevel(baseMagicLevel);
 
     for(uint8_t skill = Otc::SKILL_FIRST; skill <= Otc::SKILL_FISHING; ++skill) {
-        const uint16_t level = msg->getU16(),
-            baseLevel = msg->getU16(),
-            levelPercent = msg->getU16();
+				const uint16_t level = msg->getU16();
+				const uint16_t baseLevel = msg->getU16();
+				msg->getU16(); // base + loyalty bonus (?)
+				const uint16_t levelPercent = msg->getU16();
 
         m_localPlayer->setSkill(static_cast<Otc::skills_t>(skill), level, levelPercent);
         m_localPlayer->setBaseSkill(static_cast<Otc::skills_t>(skill), baseLevel);
@@ -2405,13 +2407,13 @@ ItemPtr ProtocolGame::getItem(const InputMessagePtr& msg, uint16 id)
     if(item->isStackable() || item->isSplash() || item->isFluidContainer() || item->isChargeable())
         item->setCountOrSubType(msg->getU8());
     else if(item->isContainer()) {
-        /*uint8 hasQuickLootFlags = msg->getU8();
+        uint8 hasQuickLootFlags = msg->getU8();
         if(hasQuickLootFlags)
             msg->getU32(); // quick loot flags
 
         uint8 hasQuiverAmmoCount = msg->getU8();
         if(hasQuiverAmmoCount)
-            msg->getU32(); // ammoTotal*/
+            msg->getU32(); // ammoTotal
     }
 
     // Impl Podium

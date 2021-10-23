@@ -34,7 +34,7 @@
 #include <client/thing/text/statictext.h>
 #include <client/map/tile.h>
 
-const uint16_t CLIENT_VERSION = 1264;
+const uint16_t CLIENT_VERSION = 1271;
 
 Game g_game;
 
