@@ -36,18 +36,7 @@ end
 
 -- parsing protocols
 local function parseMarketEnter(protocol, msg)
-    local balance
-    if g_game.getClientVersion() >= 981 then
-        balance = msg:getU64()
-    else
-        balance = msg:getU32()
-    end
-
-    local vocation = -1
-    if g_game.getClientVersion() < 950 then
-        vocation = msg:getU8() -- get vocation id
-    end
-    local offers = msg:getU8()
+    local offerCount = msg:getU8()
 
     local depotItems = {}
     local depotCount = msg:getU16()
@@ -58,7 +47,7 @@ local function parseMarketEnter(protocol, msg)
         depotItems[itemId] = itemCount
     end
 
-    signalcall(Market.onMarketEnter, depotItems, offers, balance, vocation)
+    signalcall(Market.onMarketEnter, depotItems, offerCount)
     return true
 end
 
@@ -69,7 +58,6 @@ end
 
 local function parseMarketDetail(protocol, msg)
     local itemId = msg:getU16()
-
     local descriptions = {}
     for i = MarketItemDescription.First, MarketItemDescription.Last do
         if msg:peekU16() ~= 0x00 then
@@ -139,6 +127,15 @@ local function parseMarketResourcesBalance(protocol, msg)
     return true
 end
 
+local function parseStoreBalance(protocol, msg)
+	msg:getU8() -- 0x01
+	msg:getU32() -- store coins (transferable + non-t)
+	msg:getU32() -- transferable coints
+	msg:getU32() -- reserved store coins
+	msg:getU32() -- tournament coins
+	return true
+end
+
 -- public functions
 function initProtocol()
     connect(g_game, {
@@ -176,6 +173,9 @@ function MarketProtocol.registerProtocol()
                                 parseMarketBrowse)
     ProtocolGame.registerOpcode(GameServerOpcodes.GameServerSendResourceBalance,
                                 parseMarketResourcesBalance)
+	-- to do: move to store module
+    ProtocolGame.registerOpcode(GameServerOpcodes.GameServerCoinBalance,
+                                parseStoreBalance)
     MarketProtocol.updateProtocol(g_game.getProtocolGame())
 end
 
@@ -191,6 +191,8 @@ function MarketProtocol.unregisterProtocol()
     ProtocolGame.unregisterOpcode(
         GameServerOpcodes.GameServerSendResourceBalance,
         parseMarketResourcesBalance)
+    ProtocolGame.unregisterOpcode(GameServerOpcodes.GameServerCoinBalance,
+                                  parseStoreBalance)
     MarketProtocol.updateProtocol(nil)
 end
 

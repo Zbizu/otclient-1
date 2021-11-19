@@ -120,11 +120,15 @@ MarketItemDescription = {
     Charges = 13,
     WeaponName = 14,
     Weight = 15,
-    Slot = 16
+    MagicShieldCapacity = 16,
+    Cleave = 17,
+    DamageReflection = 18,
+    PerfectShot = 19,
+    ImbuingSlots = 20
 }
 
 MarketItemDescription.First = MarketItemDescription.Armor
-MarketItemDescription.Last = MarketItemDescription.Slot
+MarketItemDescription.Last = MarketItemDescription.ImbuingSlots
 
 MarketItemDescriptionStrings = {
     [1] = 'Armor',
@@ -142,7 +146,11 @@ MarketItemDescriptionStrings = {
     [13] = 'Charges',
     [14] = 'Weapon Type',
     [15] = 'Weight',
-    [16] = 'Slot'
+    [16] = 'Magic Shield Capacity',
+    [17] = 'Cleave',
+    [18] = 'Damage Reflection',
+    [19] = 'Perfect Shot',
+    [20] = 'Imbuing Slots'
 }
 
 function getMarketDescriptionName(id)

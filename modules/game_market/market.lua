@@ -16,8 +16,6 @@
       * Extend information features
         - Hover over offers for purchase information (balance after transaction, etc)
   ]] -- temporarily disabled, needs refactoring.
-enableMartket = false
-
 Market = {}
 
 local protocol = runinsandbox('marketprotocol')
@@ -81,6 +79,9 @@ currentItems = {}
 lastCreatedOffer = 0
 fee = 0
 averagePrice = 0
+bankBalance = 0
+goldEquipped = 0
+
 
 loaded = false
 
@@ -447,14 +448,10 @@ local function updateSelectedItem(widget)
     end
 end
 
-local function updateBalance(balance)
-    local balance = tonumber(balance)
-    if not balance then return end
+local function updateBalance()
+    information.balance = bankBalance + goldEquipped
 
-    if balance < 0 then balance = 0 end
-    information.balance = balance
-
-    balanceLabel:setText('Balance: ' .. balance .. ' gold')
+    balanceLabel:setText('Balance: ' .. information.balance .. ' gold')
     balanceLabel:resizeToText()
 end
 
@@ -881,8 +878,6 @@ local function initInterface()
 end
 
 function init()
-    if not enableMartket then return end
-
     g_ui.importStyle('market')
     g_ui.importStyle('ui/general/markettabs')
     g_ui.importStyle('ui/general/marketbuttons')
@@ -904,8 +899,6 @@ function init()
 end
 
 function terminate()
-    if not enableMartket then return end
-
     Market.close()
 
     unregisterMessageMode(MessageModes.Market, onMarketMessage)
@@ -1225,24 +1218,19 @@ end
 
 -- protocol callback functions
 
-function Market.onMarketEnter(depotItems, offers, balance, vocation)
+function Market.onMarketEnter(depotItems, offers)
     if not loaded then
         initMarketItems()
         loaded = true
     end
 
-    updateBalance(balance)
+    updateBalance()
     averagePrice = 0
 
     information.totalOffers = offers
     local player = g_game.getLocalPlayer()
     if player then information.player = player end
-    if vocation == -1 then
-        if player then information.vocation = player:getVocation() end
-    else
-        -- vocation must be compatible with < 950
-        information.vocation = vocation
-    end
+	information.vocation = player:getVocation()
 
     -- set list of depot items
     information.depotItems = depotItems
@@ -1275,4 +1263,12 @@ end
 
 function Market.onMarketBrowse(offers) updateOffers(offers) end
 
-function Market.onMarketResourceBalance(resourceType, value) return end
+function Market.onMarketResourceBalance(resourceType, value)
+	if resourceType == 0x00 then
+		bankBalance = value
+	elseif resourceType == 0x01 then
+		goldEquipped = value
+	end
+	
+	updateBalance()
+end
