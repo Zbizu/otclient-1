@@ -91,18 +91,36 @@ void CreaturePainter::internalDrawOutfit(const CreaturePtr& creature, Point dest
         else
             xPattern = direction;
 
+				const int animationPhase = creature->getCurrentAnimationPhase();
+
         int zPattern = 0;
         if(creature->m_outfit.hasMount()) {
             const auto& datType = creature->rawGetMountThingType();
 
             dest -= datType->getDisplacement() * scaleFactor;
             ThingPainter::draw(datType, dest, scaleFactor, 0, xPattern, 0, 0, creature->getCurrentAnimationPhase(true), useBlank);
-            dest += creature->getDisplacement() * scaleFactor;
 
-            zPattern = std::min<int>(1, creature->getNumPatternZ() - 1);
+						if (!useBlank && creature->getLayers() > 1) {
+							Color oldColor = g_painter->getColor();
+
+							const Painter::CompositionMode oldComposition = g_painter->getCompositionMode();
+							g_painter->setCompositionMode(Painter::CompositionMode_Multiply);
+
+							Outfit::Clothes& mountClothes = creature->m_outfit.getMountClothes();
+							const auto& colors = { mountClothes.getHeadColor(), mountClothes.getBodyColor(), mountClothes.getLegsColor(), mountClothes.getFeetColor() };
+
+							for (const auto& color : colors) {
+								g_painter->setColor(color.first);
+								ThingPainter::draw(datType, dest, scaleFactor, color.second, xPattern, 0, zPattern, animationPhase, false);
+							}
+
+							g_painter->setColor(oldColor);
+							g_painter->setCompositionMode(oldComposition);
+						}
+
+						dest += creature->getDisplacement() * scaleFactor;
+						zPattern = std::min<int>(1, creature->getNumPatternZ() - 1);
         }
-
-        const int animationPhase = creature->getCurrentAnimationPhase();
 
         const PointF jumpOffset = creature->m_jumpOffset * scaleFactor;
         dest -= Point(stdext::round(jumpOffset.x), stdext::round(jumpOffset.y));
