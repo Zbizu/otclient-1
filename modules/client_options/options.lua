@@ -14,6 +14,7 @@ local defaultOptions = {
     showPrivateMessagesInConsole = true,
     showPrivateMessagesOnScreen = true,
     showLeftPanel = false,
+	showActionBar = true,
     backgroundFrameRate = 201,
     painterEngine = 0,
     enableAudio = true,
@@ -248,6 +249,8 @@ function setOption(key, value, force)
                                                                      value))
     elseif key == 'showLeftPanel' then
         modules.game_interface.getLeftPanel():setOn(value)
+	elseif key == 'showActionBar' and modules.game_actionbar then
+		modules.game_actionbar.setActionBarVisible(value)
     elseif key == 'backgroundFrameRate' then
         local text, v = value, value
         if value <= 0 or value >= 201 then
